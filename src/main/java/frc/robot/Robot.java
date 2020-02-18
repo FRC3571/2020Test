@@ -7,7 +7,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -23,6 +25,9 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private XboxController controller = new XboxController(0);
+  private PowerDistributionPanel pdp;
+  private ShooterSubsystem shooter;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -33,6 +38,8 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    pdp = new PowerDistributionPanel();
+    shooter = new ShooterSubsystem(this);
   }
 
   /**
@@ -45,6 +52,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    controller.refresh();
+    shooter.refresh();
+    Scheduler.getInstance().run();
+
   }
 
   /**
@@ -86,6 +97,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    
   }
 
   /**
@@ -94,4 +106,27 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
   }
+
+  private void initController() {
+    //   subsystemController.Buttons.Y.runCommand(new ClimbCommand(), XboxController.CommandState.WhenPressed);
+    //   subsystemController.Buttons.LB.runCommand(new LiftCommand(true), XboxController.CommandState.WhenPressed);
+     //  subsystemController.Buttons.RB.runCommand(new LiftCommand(false), XboxController.CommandState.WhenPressed);
+
+     //TODO IMPLEMENT SHOOTER COMMANDS
+       //climbing  
+      //  controller.Buttons.Y.runCommand(new ClimbCommand(), XboxController.CommandState.WhenPressed);
+     
+      //  //intake  
+      //  controller.Buttons.A.runCommand(new OpenCloseCommand(), XboxController.CommandState.WhenPressed);
+      //  //subsystemController.Buttons.B.runCommand(new TiltCommand(), XboxController.CommandState.WhenPressed);
+       
+      //  //elevator 
+      //  controller.Buttons.LB.runCommand(new LiftCommand(true), XboxController.CommandState.WhenPressed);
+      //  controller.Buttons.RB.runCommand(new LiftCommand(false), XboxController.CommandState.WhenPressed);
+   }
+
+   public XboxController getController() {
+      return controller;
+   }
+
 }
