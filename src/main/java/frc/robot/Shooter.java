@@ -1,4 +1,4 @@
-package frc.robot.subsystem;
+package frc.robot;
 
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
@@ -6,7 +6,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.commands.ManualShoot;
+import frc.robot.ManualShoot;
 import frc.robot.util.Loggable;
 import frc.robot.util.Refreshable;
 

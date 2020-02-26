@@ -1,132 +1,105 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.ChangeShooterSpeed;
+import frc.robot.ChangeShooterSpeedChange;
+import frc.robot.ManualShoot;
+import frc.robot.Shooter;
+import frc.robot.util.XboxController;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the TimedRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the build.gradle file in the
- * project.
- */
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  private XboxController controller = new XboxController(0);
-  private PowerDistributionPanel pdp;
-  private ShooterSubsystem shooter;
 
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
-    pdp = new PowerDistributionPanel();
-    shooter = new ShooterSubsystem(this);
-  }
+    public static final int kController = 1;
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
-  @Override
-  public void robotPeriodic() {
-    controller.refresh();
-    shooter.refresh();
-    Scheduler.getInstance().run();
+    private Shooter shooter;
+    private Logger logger;
+    private XboxController subsystemController;
+    private PowerDistributionPanel pdp;
+    private static Robot exposedInstance;
 
-  }
+    @Override
+    public void robotInit() {
+        exposedInstance = this;
 
-  /**
-   * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString line to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional comparisons to
-   * the switch structure below with additional strings. If using the
-   * SendableChooser make sure to add them to the chooser code above as well.
-   */
-  @Override
-  public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
-  }
+        pdp = new PowerDistributionPanel();
+        subsystemController = new XboxController(kController);
 
-  /**
-   * This function is called periodically during autonomous.
-   */
-  @Override
-  public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
+        shooter = new Shooter();
+
+        logger = Logger.getLogger(getClass().getName());
+
+        initController();
     }
-  }
 
-  /**
-   * This function is called periodically during operator control.
-   */
-  @Override
-  public void teleopPeriodic() {
-    
-  }
+    @Override
+    public void robotPeriodic() {
+        debug();
+    }
 
-  /**
-   * This function is called periodically during test mode.
-   */
-  @Override
-  public void testPeriodic() {
-  }
+    @Override
+    public void autonomousInit() {
+    }
 
-  private void initController() {
-    //   subsystemController.Buttons.Y.runCommand(new ClimbCommand(), XboxController.CommandState.WhenPressed);
-    //   subsystemController.Buttons.LB.runCommand(new LiftCommand(true), XboxController.CommandState.WhenPressed);
-     //  subsystemController.Buttons.RB.runCommand(new LiftCommand(false), XboxController.CommandState.WhenPressed);
+    @Override
+    public void autonomousPeriodic() {
+        Scheduler.getInstance().run();
+    }
 
-     //TODO IMPLEMENT SHOOTER COMMANDS
-       //climbing  
-      //  controller.Buttons.Y.runCommand(new ClimbCommand(), XboxController.CommandState.WhenPressed);
-     
-      //  //intake  
-      //  controller.Buttons.A.runCommand(new OpenCloseCommand(), XboxController.CommandState.WhenPressed);
-      //  //subsystemController.Buttons.B.runCommand(new TiltCommand(), XboxController.CommandState.WhenPressed);
-       
-      //  //elevator 
-      //  controller.Buttons.LB.runCommand(new LiftCommand(true), XboxController.CommandState.WhenPressed);
-      //  controller.Buttons.RB.runCommand(new LiftCommand(false), XboxController.CommandState.WhenPressed);
-   }
+    @Override
+    public void teleopInit() {
+    }
 
-   public XboxController getController() {
-      return controller;
-   }
+    @Override
+    public void teleopPeriodic() {
+        shooter.refresh();
+        Scheduler.getInstance().run();
+    }
 
+    @Override
+    public void testPeriodic() {
+    }
+
+    private void debug() {
+        shooter.log();
+    }
+
+    private void initController() {
+        //Testing Shooter
+        subsystemController.lb.whenPressed(new ChangeShooterSpeed(1,false));
+        subsystemController.lt.whenPressed(new ChangeShooterSpeed(1,true));
+
+        subsystemController.rb.whenPressed(new ChangeShooterSpeed(2,false));
+        subsystemController.rt.whenPressed(new ChangeShooterSpeed(2,true));
+
+        subsystemController.a.whenPressed(new ChangeShooterSpeedChange(10));
+        subsystemController.b.whenPressed(new ChangeShooterSpeedChange(1/10));
+        subsystemController.x.whenPressed(new ChangeShooterSpeedChange(5));
+        subsystemController.y.whenPressed(new ChangeShooterSpeedChange(1/5));
+
+        subsystemController.rightStick.toggleWhenPressed(new ManualShoot());
+    }
+
+    public void log(final Level logLevel, final String message) {
+        logger.log(logLevel, message);
+    }
+
+    public static Robot getInstance() {
+        if (exposedInstance == null) {
+            throw new IllegalStateException("#robotInit must finish its invocation!");
+        }
+        return exposedInstance;
+    }
+
+    public XboxController getSubsystemController() {
+        return subsystemController;
+    }
+    public Shooter getShooter() {
+        return shooter;
+    }
 }
